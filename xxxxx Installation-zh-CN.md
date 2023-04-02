@@ -14,7 +14,7 @@
 
 ### Centos7 + XXXX 
 
-#### 清理当前系统自带的 Python 环境
+#### 清理当前系统已有的 xxxxx 环境
 
 删除系统自带的 Python 以及相关的依赖包。
 
@@ -33,8 +33,8 @@
 mkdir -p /usr/local/python
 cd /usr/local/python
 # 下载相关版本的 XXXX
-wget https://www.python.org/ftp/python/3.7.10/Python-3.7.10.tgz
-tar -vxzf ./Python-3.7.11.tgz -vxzf -C ./
+wget -c -O Python-3.7.10.tgz --no-check-certificate https://www.python.org/ftp/python/3.7.10/Python-3.7.10.tgz
+tar -vxzf ./Python-3.7.11.tgz -C ./
 # 创建 当前版本的 Python 安装文件夹
 mkdir ./python-37-11
 # 进入解压文件夹
@@ -42,7 +42,7 @@ cd Python-3.7.11/
 # 修改配置 指定安装位置
 ./configure --prefix=/usr/local/python/python-37-11
 # 编译安装
-make && make install
+make -j 8 && make install
 # 删除解压包等信息
 cd ..
 rm -rf Python-3.7.11
@@ -57,42 +57,36 @@ rm -rf Python-3.7.11
 
 ```sh
 # 编辑当前用户环境变量
-vi ~/.bashrc
-
+# vi ~/.bashrc
 # 将一下信息 追加到末尾 
+######################   EFAK-web 3.0.1    #####################
+# export KE_HOME=/usr/local/kafka/efak/efak-web-3.0.1
+# export PATH=$PATH:$KE_HOME/bin
 
-    ######################   XXXXX    #####################
-    # export PYTHON_HOME=/usr/local/python/python-37-11
-    # export PATH=$PATH:$PYTHON_HOME/bin
 
-# 使用source 命令刷新环境变量
+cat >> ~/.bashrc << EOF
+
+######################   EFAK-web 3.0.1    #####################
+export KE_HOME=/usr/local/kafka/efak/efak-web-3.0.1
+export PATH=\$PATH:\$KE_HOME/bin
+
+EOF
+
 source ~/.bashrc
-# 验证 XXXX 是否配置成功
 ```
 
 
 
-#### 自定义 XXX 路径
-
-1.  创建文件夹
+接下来我们便安装好了 EFAK
 
 ```sh
-# 创建一个文件夹 存储 XXXX
-mkdir -p /usr/local/python/PythonRepository/Python37/site-packages
+#####################################################  EFAK 3.0.1
+安装目录 			/usr/local/kafka/efak/efak-web-3.0.1
+启动端口			8048
+默认账号密码		   admin 123456
+配置				 root 用户 环境变量  root/.bashrc
+操作 EFAK			 ke.sh start\status\stop
 ```
-
-
-2.  编辑 XXXX 相关的配置文件
-
-```sh
-
-```
-
-
-
-
-
-## 在一台 Linux 上安装不同版本
 
 
 

@@ -39,7 +39,7 @@ yum -y remove java-1.8.0-openjdk-1.8.0.131-11.b12.el7.x86_64
 mkdir /usr/local/java
 cd /usr/local/java
 # 下载安装包
-wget https://repo.huaweicloud.com/java/jdk/8u171-b11/jdk-8u171-linux-x64.tar.gz 
+wget -c -O jdk-8u171-linux-x64.tar.gz --no-check-certificate https://repo.huaweicloud.com/java/jdk/8u171-b11/jdk-8u171-linux-x64.tar.gz
 
 # 解压文件
 tar -zxvf ./jdk-8u171-linux-x64.tar.gz -C ./
@@ -60,10 +60,10 @@ vi ~/.bashrc
 
 # 将一下信息 追加到末尾 
 
-    ######################   JAVA    #####################
-        JAVA_HOME=/usr/local/java/jdk1.8.0_171
-        CLASSPATH=$JAVA_HOME/lib/
-        PATH=$PATH:$JAVA_HOME/bin
+######################   JAVA    #####################
+export JAVA_HOME=/usr/local/java/jdk1.8.0_171
+export CLASSPATH=$JAVA_HOME/lib/
+export PATH=$PATH:$JAVA_HOME/bin
 
 # 使用source 命令刷新环境变量
 source ~/.bashrc

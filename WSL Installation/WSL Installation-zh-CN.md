@@ -62,6 +62,7 @@ wsl --install -d kali-linux
 -   默认会以我们 **新建用户** 进行登录， 默认 root 用户 是 **没有密码** 的。
 
     -   可以使用 `su` 命令切换到 root ，然后使用 `passwd` 来为其设置密码。
+    -   也在 刚刚创建的用户下使用 `sudo passwd root` 来重新设置 root 用户的密码
 
 -   默认 Windows 系统的 盘符 会自动挂在到 `/mnt` 目录下
 
@@ -82,9 +83,9 @@ vi /etc/apt/sources.list
 
 # 注释掉原有的内容，并追加如下内容 ，deb 为常用的软件源  deb-src 为提供软件源码的源
 
-	#中科大
-    deb https://mirrors.ustc.edu.cn/kali kali-rolling main non-free contrib
-    deb-src https://mirrors.ustc.edu.cn/kali kali-rolling main non-free contrib
+	#清华大学
+    deb https://mirrors.tuna.tsinghua.edu.cn/kali kali-rolling main contrib non-free
+	deb-src https://mirrors.tuna.tsinghua.edu.cn/kali kali-rolling main contrib non-free
     #阿里云
     deb https://mirrors.aliyun.com/kali kali-rolling main non-free contrib
     deb-src https://mirrors.aliyun.com/kali kali-rolling main non-free contrib

@@ -19,23 +19,21 @@
 
 ```sh
 # 创建相关的文件夹
-mkdir /usr/local/pgsql
-# 创建我们的安装目录
-mkdir /usr/local/pgsql/13.6/
+mkdir -p /usr/local/pgsql/13.6/
 # 创建数据存放目录
-mkdir -p /usr/local/expand/pgsql13/data
+mkdir -p /usr/local/extend/pgsql13/data
 
 cd /usr/local/pgsql
 # 下载相关版本的 PostgreSQL ,由于官方提供的是 地址没有相关的认证 需要添加参数才能正常下载
-wget --no-check-certificate https://ftp.postgresql.org/pub/source/v13.6/postgresql-13.6.tar.gz
+wget -c --no-check-certificate -O postgresql-13.6.tar.gz https://ftp.postgresql.org/pub/source/v13.6/postgresql-13.6.tar.gz
 # 也可以使用国内的下载地址
-# wget --no-check-certificate https://mirrors.tuna.tsinghua.edu.cn/postgresql/source/v13.6/postgresql-13.6.tar.gz
+# wget -c --no-check-certificate -O postgresql-13.6.tar.gz https://mirrors.tuna.tsinghua.edu.cn/postgresql/source/v13.6/postgresql-13.6.tar.gz
 
 # 下载完后 解压
 tar -vxzf ./postgresql-13.6.tar.gz -C ./
 
 # 安装编译所需的环境以及库
-yum install cmake  gcc  gcc-c++ perl  readline-devel zlib   zlib-devel   tcl openssl ncurses-devel openldap
+yum install -y cmake  gcc  gcc-c++ perl  readline-devel zlib   zlib-devel   tcl openssl ncurses-devel openldap
 # gcc 			及相关 用于编译源代码
 # make 			及相关 用来批量编译链接源代码
 # readline 		及相关 执行命令后通过方向键获取命令
@@ -65,7 +63,7 @@ useradd -g postgres postgres
 # 对 PgSQL 的安装目录授权
 chown -R postgres:postgres /usr/local/pgsql/13.6/
 # 对 PgSQL 的数据目录授权
-chown -R postgres:postgres /usr/local/expand/pgsql13/data/
+chown -R postgres:postgres /usr/local/extend/pgsql13/data/
 
 
 # 切换用户
@@ -78,13 +76,13 @@ cd /usr/local/pgsql/13.6/bin/
 
 
 # 初始化
-./pg_ctl initdb -D /usr/local/expand/pgsql13/data/
+./pg_ctl initdb -D /usr/local/extend/pgsql13/data/
 # 初始化成功会出现如下语句
 # Success. You can now start the database server using:
-#     /usr/local/pgsql/13.6/bin/pg_ctl -D /usr/local/expand/pgsql13/data -l logfile start
+#     /usr/local/pgsql/13.6/bin/pg_ctl -D /usr/local/extend/pgsql13/data -l logfile start
 
 # 根据提示运行上述命令
-/usr/local/pgsql/13.6/bin/pg_ctl -D /usr/local/expand/pgsql13/data -l logfile start
+/usr/local/pgsql/13.6/bin/pg_ctl -D /usr/local/extend/pgsql13/data -l logfile start
 # 可知道我们的服务启动成功
 # waiting for server to start.... done
 # server started
@@ -103,7 +101,7 @@ vi pgsql13
 	# 修改为我们的安装目录
 	# prefix=/usr/local/pgsql/13.6
 	# 修改为我们的数据初始化目录
-	# PGDATA="/usr/local/expand/pgsql13/data"
+	# PGDATA="/usr/local/extend/pgsql13/data"
 	# 修改为我们创建的用户名
 	# PGUSER=postgres
 	
@@ -122,23 +120,23 @@ chkconfig --list pgsql13
 1.  修改允许远程 IP 链接，这儿的文件在我们 初始化 数据库的目录中。
 
 ```sh
-vi /usr/local/expand/pgsql13/data/postgresql.conf
+vi /usr/local/extend/pgsql13/data/postgresql.conf
 
 # 在 59 行添加如下配置
 	# 表示允许任意 IP 访问
-	# listen_addresses = '*'
+	listen_addresses = '*'
 	# 允许的最大连接数
-	# max_connections = 100
+	max_connections = 100
 ```
 
 2.  修改客户端授权配置文件，这儿的文件在我们 初始化 数据库的目录中。
 
 ```sh
-vi /usr/local/expand/pgsql13/data/pg_hba.conf
+vi /usr/local/extend/pgsql13/data/pg_hba.conf
 
 # 在最后 98 行添加如下
 	# 配置 所有网段 为 MD5 认证方式
-	# host    all             all             0.0.0.0/0               md5
+	host    all             all             0.0.0.0/0               md5
 
 # 修改完成后 重启服务
 service pgsql13 restart
@@ -183,12 +181,67 @@ alter user postgres with password '123456';
 接下来我们便安装好了 PgSQL 13.6
 
 ```sh
-安装目录 			/usr/local/pgsql/13.6
-数据目录 			/usr/local/expand/pgsql13/data
-配置环境 			postgres 用户环境变量 ~/.bashrc
-启动服务 			service pgsql13 start/status/stop
-账户/密码 			postgres postgres
+#####################################################  Postgresql 13.6
+安装目录            /usr/local/pgsql/13.6
+数据目录            /usr/local/extend/pgsql13/data
+配置环境            postgres 用户环境变量 ~/.bashrc
+启动服务            service pgsql13 start/status/stop
+账户/密码           postgres postgres
 ```
+
+
+
+
+
+## 其他
+
+### 通过 SQL 语句，查询相关元数据信息
+
+[Postgresql 系统库中的相关表][Postgresql 系统库中的相关表]
+
+```sql
+-- 获取 所有的 Catalog 信息   等同于 -l 命令
+SELECT datname FROM pg_database;
+-- 查看当前的 Catalog
+select catalog_name from information_schema.information_schema_catalog_name 
+where catalog_name not in ('information_schema','pg_catalog','pg_toast_temp_1','pg_temp_1','pg_toast');
+
+
+-- 查看 当前 Catalog 下的所有 Schema 信息
+select * from information_schema.schemata
+-- Schema 
+select catalog_name,schema_name from information_schema.schemata 
+where catalog_name not in ('information_schema','pg_catalog','pg_toast_temp_1','pg_temp_1','pg_toast');
+
+
+-- 查看 当前 Catalog 下的所有 Table 信息
+select * from pg_tables;
+-- Table 
+select table_catalog,table_schema,table_name,table_type from information_schema.tables where table_catalog not in ('information_schema','pg_catalog','pg_toast_temp_1','pg_temp_1','pg_toast')
+
+
+-- 查看当前 Catalog 下所有名为 testtable 的表信息，可以查看到不同 Schema 下同名的表
+select table_catalog,table_schema,table_name,column_name,data_type,udt_name,ordinal_position,is_nullable,character_maximum_length,numeric_precision,numeric_scale,datetime_precision 
+from information_schema.columns  
+where  table_name in ('testtable') ORDER BY table_name,ordinal_position;
+
+-- 查看指定 Schema 名下面所有的表
+select table_catalog,table_schema,table_name,column_name,data_type,ordinal_position,is_nullable,numeric_precision,numeric_precision_radix,numeric_scale,character_set_name,collation_name,datetime_precision,character_maximum_length 
+from information_schema.columns 
+where table_schema = 'admin'
+ORDER BY table_name,ordinal_position;
+
+-- Column 指定表名 Schema 名
+select table_catalog,table_schema,table_name,column_name,data_type,ordinal_position,is_nullable,numeric_precision,numeric_precision_radix,numeric_scale,character_set_name,collation_name,datetime_precision,character_maximum_length 
+from information_schema.columns 
+where table_catalog not in  ('information_schema','pg_catalog','pg_toast_temp_1','pg_temp_1','pg_toast')
+and table_schema = 'admin'
+and table_name = 'testtable' 
+ORDER BY table_name,ordinal_position;
+
+```
+
+
 
 
 
@@ -199,4 +252,5 @@ alter user postgres with password '123456';
 [官网介绍]:https://www.postgresql.org/
 [官方下载地址]:https://www.postgresql.org/ftp/source/
 [清华镜像下载]:https://mirrors.tuna.tsinghua.edu.cn/postgresql/
+[Postgresql 系统库中的相关表]:https://www.postgresql.org/docs/14/information-schema.html
 

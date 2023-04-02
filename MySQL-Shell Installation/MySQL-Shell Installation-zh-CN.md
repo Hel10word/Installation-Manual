@@ -43,7 +43,7 @@ vi ~/.bashrc
 # 将一下环境变量信息 追加在末尾
 
 ######################   MySQL-SHell    #####################
-export MYSQL_SHELL=/usr/local/mysqlsh/mysql-shell-8.0.27-linux-glibc2.12-x86-64bit
+export MYSQL_SHELL=/usr/local/mysql-shell/mysql-shell-8.0.27-linux-glibc2.12-x86-64bit
 export PATH=$PATH:$MYSQL_SHELL/bin
 
 

@@ -22,15 +22,17 @@
 # 创建目录
 mkdir -p /usr/local/redis
 cd /usr/local/redis
-wget https://download.redis.io/releases/redis-6.2.6.tar.gz
+wget -c -O redis-6.2.6.tar.gz --no-check-certificate https://download.redis.io/releases/redis-6.2.6.tar.gz
 
 # 解压文件
 tar -vxzf redis-6.2.6.tar.gz -C ./
+rm -f ./redis-6.2.6.tar.gz
 cd redis-6.2.6
 
 # 编译源文件
 make
-make test
+# 可以使用如下命令 测试 是都编译成功
+# make test
 
 # 在make成功以后，会在src目录下多出一些可执行文件：redis-server、redis-cli等等。
 ```
@@ -58,9 +60,7 @@ cp ./redis.conf ./6379/6379.conf
 
 # 创建一些可能会用到的目录
 cd 6379
-mkdir log
-mkdir run
-mkdir data
+mkdir log run data
 
 # 修改配置文件
 vim 6379.conf
@@ -105,6 +105,23 @@ vim 6379.conf
 ```sh
 /usr/local/redis/redis-6.2.6/bin/redis-cli shutdown
 ```
+
+
+
+接下来我们便安装好了 Redis
+
+```sh
+#####################################################  Redis 6.2.6
+安装目录 			/usr/local/redis/redis-6.2.6/
+默认端口号          6379
+当前服务相关配置     /usr/local/redis/redis-6.2.6/6379/
+启动服务端		   /usr/local/redis/redis-6.2.6/bin/redis-server /usr/local/redis/redis-6.2.6/6379/6379.conf
+启动客户端		   /usr/local/redis/redis-6.2.6/bin/redis-cli
+访问服务端          /usr/local/redis/redis-6.2.6/bin/redis-cli -h localhost -p 6379
+关闭服务端          /usr/local/redis/redis-6.2.6/bin/redis-cli shutdown
+```
+
+
 
 
 

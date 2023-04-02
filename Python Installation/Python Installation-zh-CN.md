@@ -20,11 +20,19 @@
 
 删除系统自带的 Python 以及相关的依赖包。
 
--   rpm -qa|grep python|xargs rpm -ev --allmatches --nodeps
+-   ```sh
+    rpm -qa|grep python|xargs rpm -ev --allmatches --nodeps
+    ```
+
+    
 
 删除所有的 残余文件。
 
--   whereis python |xargs rm -frv
+-   ```sh
+    whereis python |xargs rm -frv
+    ```
+
+    
 
 
 
@@ -35,7 +43,7 @@
 mkdir -p /usr/local/python
 cd /usr/local/python
 # 下载相关版本的 Python
-wget https://www.python.org/ftp/python/3.7.10/Python-3.7.10.tgz
+wget -c -O Python-3.7.10.tgz --no-check-certificate https://www.python.org/ftp/python/3.7.10/Python-3.7.10.tgz
 tar -vxzf ./Python-3.7.11.tgz -vxzf -C ./
 # 创建 当前版本的 Python 安装文件夹
 mkdir ./python-37-11
@@ -59,6 +67,14 @@ rm -rf Python-3.7.11
 ```
 
 
+
+#### 安装依赖库
+
+-   安装可能需要的依赖库，因为没有这些依赖库可能在源代码构件安装时因为缺失底层依赖库而失败。
+
+```sh
+yum -y install wget gcc zlib-devel bzip2-devel openssl-devel ncurses-devel sqlite-devel readline-devel tk-devel gdbm-devel db4-devel libpca
+```
 
 #### 修改环境变量以及
 
@@ -142,6 +158,24 @@ target=/usr/local/python/PythonRepository/Python37/site-packages
 ## 在一台 Linux 上安装不同版本
 
 在一台电脑上安装不同的版本的python，只需要下载不同版本的python包，然后重新配置一遍环境变量，以及需改相应的配置文件即可。
+
+
+
+## 其他
+
+-   可以通过下面命令查看本机 Python 想换的环境文件
+
+```sh
+python -m site
+```
+
+-   查看系统 pip.ini 文件的路径
+
+```sh
+pip config list -v
+```
+
+
 
 
 
