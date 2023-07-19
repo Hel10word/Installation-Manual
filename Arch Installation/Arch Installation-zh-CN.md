@@ -23,9 +23,22 @@ ls /sys/firmware/efi/efivars
 # 如果是 实体机 需要在 主板的 BIOS 中修设置为允许 UEFI 启动
 ```
 
+### 查看是否可以进行网络连接
+
+```sh
+# 查看 IP
+ip link
+
+# 使用 dhcpcd 联网
+dhcpcd
+
+# ping 相关网址
+ping -c 4 archlinux.org
+```
 
 
-### 创建并挂载分区
+
+### 创建并挂载分区 （本设置采用 UEFI + GPT）
 
 我们进入 Arch 的 虚拟控制台后 可以查看如下目录 , 这儿需要关注的是 `/mnt` `/dev`  两个目录:
 
@@ -49,7 +62,15 @@ fdisk -l
 # 找到 我们需要 进行分区的 数据盘 对应的接口路径
 fdisk /dev/sda
 
-# 可以使用 m 来查看各个选项的含义 , 依次输入 n , p , 回车 , 回车 , +2G , 回车 来创建一个 2GB 的分区 , 可以使用该方法来创建 4 个主分区  具体分区 大小 参考如下 表 , 四个 分区创建完成后 可以输入 i 来查看创建信息 , 输入 w 来保存分区表并退出.
+# 这儿需要创建 GPT 格式的分区表 ， 因此需要输入 g 来确保当前磁盘已从 EFI 格式 转为 GPT 格式
+# 接下来我们便可以随意进行分区
+# 可以使用 m 来查看各个选项的含义 , 依次输入 n , 回车 , 回车 , +2G , 回车 来创建一个 2GB 的分区 , 可以使用该方法来创建 4 个主分区  具体分区 大小 参考如下 表 , 四个 分区创建完成后 可以输入 i 来查看创建信息。
+# 使用 t 来修改分区类型 ， 先需要输入 分区编号 ， 然后再选择分区类型 ， 或者输入 L 来查看有哪些分区类型 
+1  EFI System
+19 Linux swap
+20 Linxu filesystem
+
+# 输入 p 来查看分区类型是否正确 ， 最后输入 w 来保存分区表并退出.
 
 # 分区创建完毕后 需要对分区进行 格式化
 # 格式化系统分区
@@ -69,6 +90,7 @@ mkdir /mnt/boot
 mount /dev/sda1 /mnt/boot
 # 交换空间 无需挂载 , 但需要启用
 swapon /dev/sda2
+# 使用 swapon -show 来查看交换分区是否正确启用
 # 挂载 家 目录
 mkdir -p /mnt/home
 mount /dev/sda4 /mnt/home
@@ -116,12 +138,14 @@ vim /etc/pacman.d/mirrorlist
 Server = https://mirrors.tuna.tsinghua.edu.cn/archlinux/$repo/os/$arch
 
 # 保存退出 更新软件包缓存
-sudo pacman -Syy
+sudo pacman -Syu
 
 # 安装必须的软件包 , 主要是 base 包 与 Linux内核以及常规硬件的固件
-pacstrap -K /mnt base linux linux-firmware base-devel vim
+pacstrap -K /mnt base linux linux-firmware base-devel vim networkmanager
 # 安装 zen内核 即高性能内核 , 但是不支持 nvidia 显卡 
-# pacstrap -K /mnt linux-zen linux-zen-headers base-devel vim
+# pacstrap -K /mnt linux-zen linux-zen-headers base-devel vim networkmanager
+# 如果提示 无法安装 可以参考官方文档 https://wiki.archlinux.org/title/Pacman/Package_signing#Cannot_import_keys
+pacman-key --init&pacman-key --populate
 ```
 
 
@@ -152,15 +176,13 @@ vim /etc/locale.gen
 # 更新
 locale-gen
 # 创建 locale.conf 文件 并编辑设定 LANG 变量
-vim /etc/locale.conf
-# 添加
-LANG=en_US.UTF-8
+echo LANG=en_US.UTF-8 > /etc/locale.conf
+# 输入 locale-gen 生成 locale 讯息
 
+# 设置主机名
+echo myArch > /etc/hostname
 
-# 网络配置
-vim /etc/hostname
-# 在文件的第一行输入你自己设定的一个myhostname,这个myhostname就是计算机名
-# 添加对应的信息到 hosts
+# 网络配置 添加对应的信息到 hosts
 vim /etc/hosts
 # 添加如下内容（将myhostname替换成你自己设定的主机名）
 127.0.0.1    localhost
@@ -171,27 +193,79 @@ vim /etc/hosts
 passwd
 ```
 
-#### 安装引导程序 
+#### 安装引导程序 (systemd-boot EFI 启动管理器)
 
 ```sh
-# 这一步 我们依然在 新系统中 而不是退出到 archIso 系统内
-pacman -S grub efibootmgr
-# 创建我们 grub 引导目录
-mkdir /boot/grub
-# 生成默认配置文件
-grub-mkconfig -o /boot/grub/grub.cfg
-# 安装引导程序
-mkdir /boot/efi
-grub-install --target=x86_64-efi --boot-directory=/boot --efi-directory=/boot/efi --bootloader-id=GRUB
-# 如果系统不支持 UEFI 方式引导 , 则改为 BIOS 方式引导
-# grub-install --target=i386-pc /dev/sda/
+# systemd-boot (以前被称为gummiboot) 是可以执行 EFI 镜像文件的简单 UEFI 启动管理器。启动的内容可以通过一个配置(glob)或者屏幕菜单选择。Arch 默认安装的 systemd 提供了这个功能。配置很简单，但是只能启动 EFI 可执行程。
+bootctl --path=/boot install
+
+# 基本设置 一般保存在 /boot/loader/loader.conf 中
+# default – 默认加载的配置文件 (不含 .conf 后缀)。
+# timeout – 启动选单的超时时间,如果不设置的话,启动选单只有在按键时才显示。
+# editor - 是否允许用户编辑内核参数. yes 是允许, no 是阻止。
+# 编辑配置文件 修改为如下
+default  arch
+timeout  4
+console-mode max
+editor   no
+
+# 添加启动选项 一般保存在 /boot/loader/loader.conf  中
+# 编辑配置文件 修改为如下
+title   Arch Linux
+linux   /vmlinuz-linux
+initrd  /initramfs-linux.img
+options root=PARTUUID=
+# 在最后添加我们的 UUID 
+blkid -s PARTUUID -o value /dev/sda3 >> /boot/loader/entries/arch.conf
+# 并且最后再次编辑该文件 确保 UUID 在 = 号后面
+
+# 退回到 Arch ISO 环境
+exit
+
+# 执行重启命令 然后可以看到多了我们的 Arch Linux 启动选项
+systemctl reboot
 ```
 
 
 
+### 最终系统相关配置
 
+- 配置网络
 
+  ```shell
+  # 更新当前源相关的软件
+  pacman -Syy
+  # 由于我们最开始安装了 networkmanager 服务，这儿需要启动
+  # 若没有安装需要手动安装 pacman -S networkmanager
+  # 启动 服务
+  NetworkManager
+  # 设置该服务为开机启动
+  systemctl enable NetworkManager.service
+  # 这儿也可以使用 ip link 查看当前启用的网卡 ， 亦或者使用 ip addr 来查看指定网卡绑定的 IP 情况
+  ip link
+  # ip link 可以开启或关闭一个网卡
+  ip link set ens33 up
+  ```
 
+  
+
+- 安装 OpenSSH （远程登录使用）
+
+  ```sh
+  # 搜索 并 安装 Openssh ， 输入 Y 进行直接安装
+  pacman -S openssh
+  # 安装完成后 修改相关的配置文件
+  vim /etc/ssh/sshd_config
+  # 修改 116 行 ， 将 PermitRootLogin 该为 yes
+  PermitRootLogin yes
+  # 然后 wq 保存退出
+  # 开机启动 相关服务
+  systemctl enable sshd.service
+  # 立即启动 相关服务
+  systemctl start sshd.service
+  ```
+
+  
 
 
 
