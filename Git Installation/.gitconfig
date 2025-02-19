@@ -1,9 +1,0 @@
-[user]
-	name = bufan
-	email = -
-[credential "helperselector"]
-	selected = <no helper>
-[core]
-	autocrlf = true
-# [http]
-# 	proxy = http://127.0.0.1:10809/

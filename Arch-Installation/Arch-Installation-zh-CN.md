@@ -46,7 +46,7 @@ ping -c 4 archlinux.org
 
 ​	`/dev` : 主要是作为访问外部设备文件的几口 , 比如我们的 数据盘 , 外接的磁盘 , U盘 , 我们需要安装系统的盘.
 
-![image-20230113174933145](Arch Installation-zh-CN-img/image-20230113174933145.png)
+![image-20230113174933145](Arch-Installation-zh-CN-img/image-20230113174933145.png)
 
 
 
